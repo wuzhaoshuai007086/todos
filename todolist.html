@@ -1,0 +1,235 @@
+<!doctype html>
+<html lang="en">
+<head>
+	<meta charset="UTF-8">
+	<title>todulist</title>
+</head>
+<style>
+	body,ul,li{
+	margin: 0;
+	padding: 0;
+	list-style: none;
+}
+body{
+background:#CDCDCD; 
+}
+nav{
+	width: 100%;
+	height: 50px;
+	background: #333;
+}
+.nav{
+	width: 600px;
+	height: 100%;
+	margin: 0 auto;
+}
+.navLogo{
+	color:#DDD;
+	font-size: 24px;
+	line-height: 50px;
+	float: left;
+}
+.nav input{
+width: 60%;
+height: 24px;
+margin-top: 12px;
+border-radius: 5px;
+float: right;
+}
+.list{
+	width: 600px;
+	height: auto;
+	margin: 0 auto;
+}
+.listtop{
+	width: 100%;
+	height: 70px;
+	color:  #000;
+	font-size: 24px;
+	line-height: 70px;
+}
+.listtop .title{
+float: left;
+}
+.listtop .num{
+	width: 20px;
+	height: 20px;
+	border-radius: 50%;
+	background:#E6E6FA ;
+	font-size: 18px;
+float: right;
+text-align: center;
+line-height: 20px;
+margin-top: 25px;
+}
+.content-box{
+	width: 100%;
+/*	height:32px;*/
+	margin-bottom: 10px;
+	overflow: hidden;
+}
+.content-box li{
+    height: 32px;
+    line-height: 32px;
+    background: #fff;
+    position: relative;
+    margin-bottom: 10px;
+    border-radius: 3px;
+    border-left: 5px solid #629A9C;
+    box-shadow: 0 1px 2px rgba(0,0,0,0.07);
+    /*float: left;*/
+}
+.content-box li input{
+    width: 22px;
+    height: 22px;
+    cursor: pointer;
+    float: left;
+}
+.content-box li .content{
+	width: auto;
+    height: 32px;
+    cursor: pointer;
+    float: left;
+margin-left: 10px;
+}
+.content-box li .del{
+width: 20px;
+height: 20px;
+border: 1px solid #ccc;
+float: right;
+border-radius: 50%;
+margin-top: 5px;
+background: #ccc;
+padding: 3px;
+background-origin:content-box;	
+background-clip:content-box;
+text-align: center;
+line-height: 12px;
+color: #fff;
+}
+</style>
+<body>
+<nav>
+	<div class="nav">
+		<div class="navLogo">ToDoList</div>
+		<input type="text" name="require"  required placeholder='添加ToDo'>
+	</div>
+	<div class="list">
+		<div class="nowlist">
+			<div class="listtop">
+				<div class="title">正在进行</div>
+				<div class="num">0</div>
+			</div>
+			<ul class="content-box">
+<!-- 				<li>	
+					<input type="checkbox">
+					<div class="content">11</div>
+					<div class="del">-</div>
+				</li> -->
+			</ul>
+		</div>
+		<div class="comlist">
+			<div class="listtop">
+				<div class="title">已经完成</div>
+				<div class="num">0</div>
+			</div>
+			<ul class="content-box">
+<!-- 				<li>	
+					<input type="checkbox">
+					<div class="content"></div>
+					<div class="del">-</div>
+				</li> -->
+			</ul>
+		</div>
+	</div>
+</nav>	
+</body>
+<script>
+	var tianjia=document.querySelector('input[name=require]');
+	var data=[];
+	tianjia.onkeydown=function(e){
+		var e=e||window.event;
+		if (e.keyCode==13) {
+			if (tianjia.value=='') {
+				alert('请填写此字段');
+			}else{
+				var val=this.value;
+				var data=getData();
+				data.push({'title':val,'status':false});
+				saveData(data); 
+				onload();
+			};			
+		}
+		
+	}
+	function saveData(data){
+		localStorage.setItem("todos",JSON.stringify(data));
+	}
+	function getData(){
+		var data=JSON.parse(localStorage.getItem('todos'));
+		return data||[];
+	}
+	function onload(){
+		data=getData();
+		var now=document.querySelector('.nowlist .content-box');
+		var com=document.querySelector('.comlist .content-box');
+		var nowNum=document.querySelector('.nowlist .num');
+		var comNum=document.querySelector('.comlist .num');
+
+		var nowString="",comString="",nowNums=0,comNums=0;
+		for (var i = 0; i < data.length; i++) {
+			if (data[i].status==false) {
+				nowString+='<li><input type="checkbox" onclick="changeSta('+i+')"><div class="content" contenteditable onblur="edit('+i+')">'+data[i].title+'</div><div class="del" onclick="del('+i+')">-</div></li>';
+			nowNums++;
+			}else{
+				comString+='<li><input type="checkbox" checked onclick="changeSta('+i+')"><div class="content" contenteditable onblur="edit('+i+')">'+data[i].title+'</div><div class="del" onclick="del('+i+')">-</div></li>';
+			comNums++;
+			};
+		};
+		now.innerHTML=nowString;
+		com.innerHTML=comString;
+		nowNum.innerHTML=nowNums;
+		comNum.innerHTML=comNums;
+	}
+	onload();
+	function changeSta(i){	
+		var data=getData();
+		// console.log(data);
+		if (data[i].status==false) {
+			data[i].status=true;
+		}else if(data[i].status==true){
+			data[i].status=false;
+		};
+	saveData(data);
+	onload();
+	}
+	function del(i){
+	var data=getData();
+	data.splice(i,1);
+	saveData(data);
+	onload();
+	}
+	function edit(i){
+		var data=getData();
+		// console.log(val);
+		if (data[i].status==false) {
+			var now=document.querySelectorAll('.nowlist .content')[i];
+			// console.log(now);
+			alert(1)
+		}else{
+			var now=document.querySelectorAll('.comlist .content')[i];	
+	
+			alert(2)
+		};
+			data[i].title=now.innerHTML;
+			saveData(data);
+		// console.log(now);
+
+		// alert(i);	
+		// console.log(val);
+		// var data=getData();
+		// data[i].title=now.innerHTML;
+		// saveData(data);
+	}
+</script>
+</html>
